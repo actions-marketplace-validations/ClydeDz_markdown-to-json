@@ -24,7 +24,7 @@ runs:
         node --version
 
     - name: Install required npm packages
-      if: ${{ inputs.skip-installation && 'True' || 'False' }}
+      if: ${{ inputs.skip-installation != 'true' }}
       shell: bash
       run: |
         npm install markdown-json --global --loglevel error    
