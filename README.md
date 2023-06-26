@@ -1,67 +1,85 @@
-Markdown to JSON
+# Markdown to JSON
 
-```
-markdown-json [OPTIONS] [ARGS]
+Convert markdown files from the provided directory into a single JSON file.
 
-Options:
-  -c, --config [STRING]              settings file (Default is ./settings.json)
-  -D, --display BOOLEAN              enable display mode
-  -d, --dist [STRING]                output file directory (Default is ./dist/output.json)
-  -i, --ignore STRING                ignore file pattern
-  -o, --deterministicOrder BOOLEAN   enable deterministic output ordering
-  -p, --filePattern [STRING]         file(s) directory (Default is **/*.md)
-  -P, --port [NUMBER]                server port (Default is 3001)
-  -S, --server BOOLEAN               enable server
-  -s, --src [STRING]                 file(s) directory (Default is ./)
-  -w, --cwd [STRING]                 work directory (Default is ./)
-  -h, --help                         display help and usage details
-
-{
-  "name": "markdown-json",
-  "cwd": "./",
-  "src": "example/content/",
-  "filePattern": "**/*.md",
-  "ignore": "*(icon|input)*",
-  "dist": "example/output.json",
-  "metadata": true,
-  "server": true,
-  "port": 3001,
-  "deterministicOrder": false
-}
-```
-
-# Compress Images
-
-Compress all images from the provided directory.
-
-Uses the [imagemin CLI](https://github.com/imagemin/imagemin-cli) to compress images from the input directory and then places the compressed images in the output directory. For JPG it uses [mozjpeg](https://github.com/mozilla/mozjpeg), PNG it uses [pngquant](https://github.com/kornelski/pngquant) and for GIFs it uses [gifsicle](https://www.lcdf.org/gifsicle/) compressors.
+Uses the [markdown-json npm package](https://www.npmjs.com/package/markdown-json) to convert the markdown files from a directory into a single JSON file. This is especially useful in the case of a static API where you're updating content in markdown and then generating a JSON that serves as an API.
 
 ## Inputs
 
-While all the input parameters are optional, feel free to supply them in case you need to customize the values. See example usage below to know how to customize these values. 
+This action requires only one mandatory input as outlined below.
 
-| **Parameter**           | **Description**                                                                             | **Default value** |
-| ----------------------- | ------------------------------------------------------------------------------------------- | ----------------- |
-| input-directory         | Directory that contains uncompressed images.                                                | images            |
-| output-directory        | Directory that will contain the compressed images                                           | dist              |
-| jpg-compression-quality | Set the level of compression for JPG image files. Value should be in the range of 0 to 100. | 40                |
-| png-compression-quality | Set the level of compression for PNG image files. Value should be in the range of 0 to 1.   | 0.4               |
-| gif-compression-quality | Set the level of compression for GIF image files. Value should be in the range of 1 to 3.   | 2                 |
+| **Parameter**      | **Description**                                                                   | **Is required?** |
+| ------------------ | --------------------------------------------------------------------------------- | ---------------- |
+| settings-json-file | Path to the settings json file that will be supplied to the Markdown to JSON tool | Yes              |
+
+
+### What does the settings JSON file look like? 
+
+This is a sample settings JSON file that you could use. Explanation provided below.
+```json
+{
+  "name": "My API",
+  "cwd": "./",
+  "src": "example/content/",
+  "filePattern": "**/*.md",
+  "ignore": "*(icon|input)*",  
+  "metadata": true,  
+  "deterministicOrder": false,
+  "dist": "example/output.json",
+  "display": false,  
+  "server": true,
+  "port": 3215,
+}
+```
+
+| **Key**            | **Description**                                                         |
+| ------------------ | ----------------------------------------------------------------------- |
+| name               | Optional friendly name for the settings JSON file                       |
+| cwd                | Working directory (Default is ./)                                       |
+| src                | File(s) directory (Default is ./)                                       |
+| filePattern        | Inclusion file pattern (Default is **/*.md)                             |
+| ignore             | Exclusion file pattern (Default is '')                                  |
+| metadata           | Generates metadata in the JSON content for each item (Default is false) |
+| deterministicOrder | Enables deterministic output ordering                                   |
+| dist               | Output file directory (Default is ./dist/output.json)                   |
+| display            | Display verbose logs (Default is true)                                  |
+| server             | Serves the converted JSON files on a server (Default is false)          |
+| port               | If server enabled, this server port is used (Default is 3001)           |
 
 ## Outputs
 
-The compressed images will be sent to the supplied `output-directory`. Use the `actions/upload-artifact` to make the compressed images available as an artifact, or commit these files into the repository if that better suits your requirements.  
+The JSON file will be sent to the directory provided in the `dist` key of the settings JSON file. Use the `actions/upload-artifact` to make the JSON file available as an artifact, or commit these files into the repository if that better suits your requirements.  
 
 ## Example usage
 
-This is what using this action might look like. You can skip the optional parameters and/or customize the values as per the range described above. 
-
-```yaml
-uses: clydedz/compress-images@v1
-with:
-  input-directory: images
-  output-directory: dist
-  jpg-compression-quality: 40
-  png-compression-quality: 0.4
-  gif-compression-quality: 2
+Let's say this is your project structure. You have some markdown files in a folder called markdown that you want to convert and combine into a single JSON file. You also have the settings JSON file in the setting folder which the GitHub action will use. 
 ```
+your project
+|
+|── .github/workflows/
+|  |── convert.yml
+|── markdown
+|  |── abc.md
+|  |── def.md
+|── settings
+|  |── convert.json
+```
+
+This is how you'll consume this GitHub action. 
+```yaml
+- name: Convert markdown to json
+  uses: ClydeDz/markdown-to-json@1.0.0
+  with:
+    settings-json-file: settings/convert.json
+```
+
+This is what your settings JSON file will look like assuming the project structure above.
+```json
+{
+  "cwd": "./",
+  "src": "markdown/",
+  "filePattern": "**/*.md",
+  "dist": "example/api.json",
+}
+```
+
