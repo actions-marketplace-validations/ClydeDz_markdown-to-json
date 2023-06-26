@@ -1,0 +1,35 @@
+name: "Markdown to JSON"
+description: "Converts Markdown files in a directory into a single JSON file"
+author: "Clyde D'Souza"
+branding:
+  icon: "zap"
+  color: "yellow"
+
+inputs:  
+  settings-json-file:  
+    description: "Path to the settings json file that will supplied for the Markdown to JSON tool"
+    required: true
+  
+  skip-installation:  
+    description: "If you're using this action in multiple steps in the same job, you may want to skip installation in subsequent steps"
+    default: false
+    
+runs:
+  using: "composite"
+  steps:
+    - name: Print npm and node version
+      shell: bash
+      run: |
+        npm --version
+        node --version
+
+    - name: Install required npm packages
+      if: ${{ inputs.skip-installation && 'True' || 'False' }}
+      shell: bash
+      run: |
+        npm install markdown-json --global --loglevel error    
+
+    - name: Run conversion of markdown to json
+      shell: bash
+      run: |
+        markdown-json -c ${{ inputs.settings-json-file }}
