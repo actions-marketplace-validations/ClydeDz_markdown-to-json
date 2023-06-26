@@ -10,9 +10,9 @@ inputs:
     description: "Path to the settings json file that will supplied for the Markdown to JSON tool"
     required: true
   
-  skip-installation:  
-    description: "If you're using this action in multiple steps in the same job, you may want to skip installation in subsequent steps"
-    default: false
+  # skip-installation:  
+  #   description: "If you're using this action in multiple steps in the same job, you may want to skip installation in subsequent steps"
+  #   default: false
     
 runs:
   using: "composite"
@@ -24,10 +24,10 @@ runs:
         node --version
 
     - name: Install required npm packages
-      if: ${{ inputs.skip-installation != 'true' }}
+      # if: ${{ inputs.skip-installation != 'true' }}
       shell: bash
       run: |
-        npm install markdown-json --global --loglevel error    
+        npm list markdown-json --global || npm install markdown-json --global --loglevel error    
 
     - name: Run conversion of markdown to json
       shell: bash
